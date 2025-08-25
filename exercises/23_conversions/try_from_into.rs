@@ -25,25 +25,75 @@ enum IntoColorError {
 
 // TODO: Tuple implementation.
 // Correct RGB color values must be integers in the 0..=255 range.
-impl TryFrom<(i16, i16, i16)> for Color {
+impl<T> TryFrom<(T, T, T)> for Color
+where
+    u8: TryFrom<T>,
+{
     type Error = IntoColorError;
+    fn try_from(tuple: (T, T, T)) -> Result<Self, Self::Error> {
+        let (r, g, b) = tuple;
 
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {}
+        let red = r.try_into().map_err(|_| IntoColorError::IntConversion)?;
+        let green = g.try_into().map_err(|_| IntoColorError::IntConversion)?;
+        let blue = b.try_into().map_err(|_| IntoColorError::IntConversion)?;
+
+        Ok(Color { red, green, blue })
+    }
 }
 
 // TODO: Array implementation.
-impl TryFrom<[i16; 3]> for Color {
+impl<T: Clone> TryFrom<[T; 3]> for Color
+where
+    u8: TryFrom<T>,
+{
     type Error = IntoColorError;
 
-    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {}
+    fn try_from(arr: [T; 3]) -> Result<Self, Self::Error> {
+        let red = arr[0]
+            .clone()
+            .try_into()
+            .map_err(|_| IntoColorError::IntConversion)?;
+        let green = arr[1]
+            .clone()
+            .try_into()
+            .map_err(|_| IntoColorError::IntConversion)?;
+        let blue = arr[2]
+            .clone()
+            .try_into()
+            .map_err(|_| IntoColorError::IntConversion)?;
+
+        Ok(Color { red, green, blue })
+    }
 }
 
 // TODO: Slice implementation.
 // This implementation needs to check the slice length.
-impl TryFrom<&[i16]> for Color {
+impl<T: Clone> TryFrom<&[T]> for Color
+where
+    u8: TryFrom<T>,
+{
     type Error = IntoColorError;
 
-    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {}
+    fn try_from(slice: &[T]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+
+        let red = slice[0]
+            .clone()
+            .try_into()
+            .map_err(|_| IntoColorError::IntConversion)?;
+        let green = slice[1]
+            .clone()
+            .try_into()
+            .map_err(|_| IntoColorError::IntConversion)?;
+        let blue = slice[2]
+            .clone()
+            .try_into()
+            .map_err(|_| IntoColorError::IntConversion)?;
+
+        Ok(Color { red, green, blue })
+    }
 }
 
 fn main() {
